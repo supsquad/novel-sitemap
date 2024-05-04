@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -a
+. .env.$1.local
+set +a
+
+if [ "$2" = "--app" ]; then
+    source ./scripts/build $1
+    export COMPOSE_PROFILES=app
+fi
+
+docker compose -f docker-compose.yml up -d

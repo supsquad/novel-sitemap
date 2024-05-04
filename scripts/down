@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -a
+. .env.$1.local
+set +a
+
+export COMPOSE_PROFILES=app
+
+docker compose -f docker-compose.yml down ${@:2}
