@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -a
+. .env.$1.local
+set +a
+
+yarn migration:up ${@:2}
