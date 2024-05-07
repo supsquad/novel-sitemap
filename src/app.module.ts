@@ -4,13 +4,13 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { DatabaseModule } from './core/database.module';
 import { NovelModule } from './novel/novel.module';
 
+const cronModules =
+  process.env.APP_CRON === 'true'
+    ? [ScheduleModule.forRoot(), CategoryModule, NovelModule]
+    : [];
+
 @Module({
-  imports: [
-    DatabaseModule,
-    ScheduleModule.forRoot(),
-    CategoryModule,
-    NovelModule,
-  ],
+  imports: [DatabaseModule, ...cronModules],
   controllers: [],
   providers: [],
 })
