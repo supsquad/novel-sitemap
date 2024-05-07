@@ -1,3 +1,3 @@
 export enum LogType {
-  NOVEL_TASK = 'NOVEL_TASK',
+  NOVEL_TASK_GET_LAST_PAGE = 'NOVEL_TASK_GET_LAST_PAGE',
 }

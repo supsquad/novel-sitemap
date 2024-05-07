@@ -32,13 +32,13 @@ export class NovelTask {
       element.getAttribute('href').split('/').at(-2).split('-').at(-1),
     );
     let log = await this.em.findOne(LogEntity, {
-      type: NovelLogType.NOVEL_TASK,
+      type: NovelLogType.NOVEL_TASK_GET_LAST_PAGE,
     });
     if (log) {
       log.memo = { ...log.memo, last: page };
     } else {
       log = this.em.create(LogEntity, {
-        type: NovelLogType.NOVEL_TASK,
+        type: NovelLogType.NOVEL_TASK_GET_LAST_PAGE,
         memo: {
           last: page,
           current: 1,
@@ -55,7 +55,7 @@ export class NovelTask {
   public async getNovelsByPage() {
     console.log('get novel by page: start...');
     const log = await this.em.findOne(LogEntity, {
-      type: NovelLogType.NOVEL_TASK,
+      type: NovelLogType.NOVEL_TASK_GET_LAST_PAGE,
     });
     if (log) {
       const pageResponse = await firstValueFrom(

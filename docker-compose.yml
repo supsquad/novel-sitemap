@@ -16,8 +16,8 @@ services:
     ports:
       - ${APP_PORT}:3000
     env_file:
-      - .env.compose
       - .env.${MODE}.local
+      - .env.compose
     profiles:
       - app
     depends_on:
@@ -30,8 +30,8 @@ services:
     restart: always
     entrypoint: ['yarn', 'start:prod']
     env_file:
-      - .env.compose
       - .env.${MODE}.local
+      - .env.compose
     environment:
       - APP_CRON=true
     profiles:
