@@ -7,7 +7,6 @@ export class CategoryEntity extends BaseEntity {
   @Property({
     name: 'slug',
     columnType: 'varchar(255)',
-    nullable: false,
     unique: true,
   })
   slug: string;
@@ -15,14 +14,12 @@ export class CategoryEntity extends BaseEntity {
   @Property({
     name: 'name',
     columnType: 'varchar(255)',
-    nullable: false,
   })
   name: string;
 
   @Property({
     name: 'original_id',
     columnType: 'varchar(255)',
-    nullable: false,
     unique: true,
   })
   originalId: string;
@@ -31,6 +28,7 @@ export class CategoryEntity extends BaseEntity {
     pivotTable: 'category_novel',
     joinColumn: 'category_id',
     inverseJoinColumn: 'novel_id',
+    nullable: true,
   })
   novels?: NovelEntity[];
 }

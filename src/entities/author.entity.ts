@@ -8,14 +8,12 @@ export class AuthorEntity extends BaseEntity {
   @Property({
     name: 'name',
     columnType: 'varchar(255)',
-    nullable: false,
   })
   name: string;
 
   @Property({
     name: 'slug',
     columnType: 'varchar(255)',
-    nullable: false,
     unique: true,
   })
   slug: string;
@@ -24,16 +22,18 @@ export class AuthorEntity extends BaseEntity {
     name: 'original_id',
     columnType: 'varchar(255)',
     unique: true,
+    nullable: true,
   })
   originalId?: string;
 
-  @OneToOne(() => UserEntity, undefined, { unique: true })
+  @OneToOne(() => UserEntity, undefined, { unique: true, nullable: true })
   user?: UserEntity;
 
   @ManyToMany(() => NovelEntity, undefined, {
     pivotTable: 'author_novel',
     joinColumn: 'author_id',
     inverseJoinColumn: 'novel_id',
+    nullable: true,
   })
   novels?: NovelEntity[];
 }

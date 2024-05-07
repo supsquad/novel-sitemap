@@ -9,7 +9,6 @@ export class NovelEntity extends BaseEntity {
   @Property({
     name: 'slug',
     columnType: 'varchar(255)',
-    nullable: false,
     unique: true,
   })
   slug: string;
@@ -17,14 +16,12 @@ export class NovelEntity extends BaseEntity {
   @Property({
     name: 'name',
     columnType: 'varchar(255)',
-    nullable: false,
   })
   name: string;
 
   @Property({
     name: 'original_id',
     columnType: 'varchar(255)',
-    nullable: false,
     unique: true,
   })
   originalId: string;
@@ -32,13 +29,13 @@ export class NovelEntity extends BaseEntity {
   @Property({
     name: 'tags',
     columnType: 'varchar(255) []',
+    nullable: true,
   })
   tags?: string[];
 
   @Property({
     name: 'chapter_count',
     columnType: 'int',
-    nullable: false,
     default: 0,
   })
   chapterCount: number;
@@ -50,6 +47,7 @@ export class NovelEntity extends BaseEntity {
     pivotTable: 'category_novel',
     joinColumn: 'novel_id',
     inverseJoinColumn: 'category_id',
+    nullable: true,
   })
   categories?: CategoryEntity[];
 
@@ -57,6 +55,7 @@ export class NovelEntity extends BaseEntity {
     pivotTable: 'author_novel',
     joinColumn: 'novel_id',
     inverseJoinColumn: 'author_id',
+    nullable: true,
   })
   authors?: AuthorEntity[];
 }

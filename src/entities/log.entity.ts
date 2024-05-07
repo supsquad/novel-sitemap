@@ -7,14 +7,12 @@ export class LogEntity extends BaseEntity {
   @Property({
     name: 'type',
     columnType: 'varchar(255)',
-    nullable: false,
   })
   type: string;
 
   @Property({
     name: 'severity',
     columnType: 'varchar(255)',
-    nullable: false,
     default: LogSeverity.INFO,
   })
   severity: string;
@@ -22,6 +20,7 @@ export class LogEntity extends BaseEntity {
   @Property({
     name: 'memo',
     columnType: 'text',
+    nullable: true,
   })
-  log?: string;
+  memo?: string;
 }

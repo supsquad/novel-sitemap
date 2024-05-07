@@ -7,14 +7,12 @@ import { AuthorEntity } from './author.entity';
 export class UserEntity extends BaseEntity {
   @Property({
     name: 'name',
-    nullable: false,
     columnType: 'varchar(255)',
   })
   name: string;
 
   @Property({
     name: 'email',
-    nullable: false,
     columnType: 'varchar(255)',
     unique: true,
   })
@@ -24,20 +22,19 @@ export class UserEntity extends BaseEntity {
     name: 'phone',
     columnType: 'varchar(255)',
     unique: true,
+    nullable: true,
   })
-  phone: string;
+  phone?: string;
 
   @Property({
     name: 'password',
     columnType: 'varchar(255)',
-    nullable: false,
   })
   password: string;
 
   @Property({
     name: 'status',
     columnType: 'varchar(255)',
-    nullable: false,
     default: 'active',
   })
   status: string;
@@ -45,16 +42,22 @@ export class UserEntity extends BaseEntity {
   @Property({
     name: 'last_login',
     columnType: 'timestamp',
+    nullable: true,
   })
   lastLogin?: Date;
 
-  @OneToOne(() => AuthorEntity, undefined, { unique: true, name: 'author_id' })
-  author: AuthorEntity;
+  @OneToOne(() => AuthorEntity, undefined, {
+    unique: true,
+    name: 'author_id',
+    nullable: true,
+  })
+  author?: AuthorEntity;
 
   @ManyToMany(() => PermissionEntity, undefined, {
     pivotTable: 'user_permission',
     joinColumn: 'user_id',
     inverseJoinColumn: 'permission_id',
+    nullable: true,
   })
-  roles: PermissionEntity[];
+  permissions?: PermissionEntity[];
 }

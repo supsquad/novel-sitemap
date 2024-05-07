@@ -9,7 +9,6 @@ export abstract class BaseEntity {
     name: 'created_at',
     columnType: 'timestamp',
     default: new Date().toISOString(),
-    nullable: false,
   })
   createdAt: Date;
 
@@ -17,12 +16,14 @@ export abstract class BaseEntity {
     name: 'updated_at',
     columnType: 'timestamp',
     onUpdate: () => new Date().toISOString(),
+    nullable: true,
   })
-  updatedAt: Date;
+  updatedAt?: Date;
 
   @Property({
     name: 'deleted_at',
     columnType: 'timestamp',
+    nullable: true,
   })
-  deletedAt: Date;
+  deletedAt?: Date;
 }

@@ -6,14 +6,12 @@ import { NovelEntity } from './novel.entity';
 export class NovelChapterEntity extends BaseEntity {
   @Property({
     name: 'name',
-    nullable: false,
   })
   name: string;
 
   @Property({
     name: 'slug',
     columnType: 'varchar(255)',
-    nullable: false,
     unique: true,
   })
   slug: string;
@@ -21,21 +19,18 @@ export class NovelChapterEntity extends BaseEntity {
   @Property({
     name: 'sequence',
     columnType: 'int',
-    nullable: false,
   })
   sequence: number;
 
   @Property({
     name: 'content',
     columnType: 'text',
-    nullable: false,
   })
   content: string;
 
   @Property({
     name: 'original_id',
     columnType: 'varchar(255)',
-    nullable: false,
     unique: true,
   })
   originalId: string;

@@ -6,7 +6,6 @@ import { UserEntity } from './user.entity';
 export class PermissionEntity extends BaseEntity {
   @Property({
     name: 'name',
-    nullable: false,
     unique: true,
   })
   name: string;
@@ -15,6 +14,7 @@ export class PermissionEntity extends BaseEntity {
     pivotTable: 'user_permission',
     joinColumn: 'permission_id',
     inverseJoinColumn: 'user_id',
+    nullable: true,
   })
-  roles: UserEntity[];
+  users?: UserEntity[];
 }
