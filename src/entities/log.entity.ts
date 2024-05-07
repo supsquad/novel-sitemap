@@ -1,6 +1,6 @@
 import { Entity, Property } from '@mikro-orm/core';
 import { BaseEntity } from '../core/base.entity';
-import { LogSeverity } from '../core/constants';
+import { LogSeverity } from '../core/base.constants';
 
 @Entity({ tableName: 'log' })
 export class LogEntity extends BaseEntity {
@@ -19,8 +19,11 @@ export class LogEntity extends BaseEntity {
 
   @Property({
     name: 'memo',
-    columnType: 'text',
+    columnType: 'jsonb',
     nullable: true,
   })
-  memo?: string;
+  memo?: {
+    last: number;
+    current: number;
+  };
 }

@@ -17,13 +17,6 @@ export class CategoryEntity extends BaseEntity {
   })
   name: string;
 
-  @Property({
-    name: 'original_id',
-    columnType: 'varchar(255)',
-    unique: true,
-  })
-  originalId: string;
-
   @ManyToMany(() => NovelEntity, undefined, {
     pivotTable: 'category_novel',
     joinColumn: 'category_id',

@@ -1,4 +1,4 @@
-import { Interval } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -13,10 +13,10 @@ export class CategoryTask {
     private readonly http: HttpService,
   ) {}
 
-  @Interval(24 * 60 * 60 * 1000)
+  @Cron('0 */1 * * * *')
   @CreateRequestContext()
   public async getCategories() {
-    console.log('Get categories task: start...');
+    console.log('get categories: start...');
     const response = await firstValueFrom(
       this.http.get('https://truyenfull.vn'),
     );
@@ -26,20 +26,13 @@ export class CategoryTask {
       .querySelector('.dropdown-menu.multi-column')
       .querySelectorAll('a');
     elements.forEach(async (element) => {
-      const href = element.getAttribute('href');
-      const originalId = href.split('/').at(-2);
-      const payload = {
-        name: element.text,
-        slug: originalId,
-        originalId,
-      };
-      if (await this.em.findOne(CategoryEntity, { originalId })) {
-        return;
-      }
-      const category = this.em.create(CategoryEntity, payload);
+      const name = element.text;
+      const slug = element.getAttribute('href').split('/').at(-2);
+      const category = await this.em.upsert(CategoryEntity, { name, slug });
       this.em.persist(category);
     });
+    console.log(`category count: ${elements.length}...`);
     await this.em.flush();
-    console.log('Get categories task: done.');
+    console.log('get categories: done.');
   }
 }

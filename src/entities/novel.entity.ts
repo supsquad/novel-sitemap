@@ -20,13 +20,6 @@ export class NovelEntity extends BaseEntity {
   name: string;
 
   @Property({
-    name: 'original_id',
-    columnType: 'varchar(255)',
-    unique: true,
-  })
-  originalId: string;
-
-  @Property({
     name: 'tags',
     columnType: 'varchar(255) []',
     nullable: true,
@@ -39,6 +32,27 @@ export class NovelEntity extends BaseEntity {
     default: 0,
   })
   chapterCount: number;
+
+  @Property({
+    name: 'description',
+    columnType: 'text',
+    nullable: true,
+  })
+  description?: string;
+
+  @Property({
+    name: 'image',
+    columnType: 'varchar(255)',
+    nullable: true,
+  })
+  image?: string;
+
+  @Property({
+    name: 'score',
+    columnType: 'float(2)',
+    default: 10,
+  })
+  score: number;
 
   @OneToMany(() => NovelChapterEntity, 'novel')
   chapters: NovelChapterEntity[];

@@ -3,5 +3,3 @@ export enum LogSeverity {
   WARNING = 'WARNING',
   ERROR = 'ERROR',
 }
-
-export enum LogType {}

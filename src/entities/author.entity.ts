@@ -18,14 +18,6 @@ export class AuthorEntity extends BaseEntity {
   })
   slug: string;
 
-  @Property({
-    name: 'original_id',
-    columnType: 'varchar(255)',
-    unique: true,
-    nullable: true,
-  })
-  originalId?: string;
-
   @OneToOne(() => UserEntity, undefined, { unique: true, nullable: true })
   user?: UserEntity;
 

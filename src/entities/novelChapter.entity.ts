@@ -28,13 +28,6 @@ export class NovelChapterEntity extends BaseEntity {
   })
   content: string;
 
-  @Property({
-    name: 'original_id',
-    columnType: 'varchar(255)',
-    unique: true,
-  })
-  originalId: string;
-
   @ManyToOne(() => NovelEntity)
   novel: NovelEntity;
 }
