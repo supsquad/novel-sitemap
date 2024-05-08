@@ -3,12 +3,14 @@ import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { parse } from 'node-html-parser';
-import { LogEntity } from 'src/entities/log.entity';
-import { LogType as NovelLogType } from './novel.constants';
+import { NovelTaskName } from './novel.constants';
 import { NovelEntity } from 'src/entities/novel.entity';
 import { EntityManager, CreateRequestContext } from '@mikro-orm/postgresql';
 import { AuthorEntity } from 'src/entities/author.entity';
 import { CategoryEntity } from 'src/entities/category.entity';
+import { TaskEntity } from 'src/entities/task.entity';
+import { TaskScope } from 'src/app.constants';
+import { NovelChapterEntity } from 'src/entities/novelChapter.entity';
 
 @Injectable()
 export class NovelTask {
@@ -26,43 +28,48 @@ export class NovelTask {
     );
     const data = response.data;
     const root = parse(data);
-    const element = root
-      .querySelector('.pagination.pagination-sm')
-      .querySelectorAll('a')
-      .at(-2);
-    const page = parseInt(
-      element.getAttribute('href').split('/').at(-2).split('-').at(-1),
+    const last = parseInt(
+      root
+        .querySelector('.pagination.pagination-sm')
+        .querySelectorAll('a')
+        .at(-2)
+        .getAttribute('href')
+        .split('/')
+        .at(-2)
+        .split('-')
+        .at(-1),
     );
-    let log = await this.em.findOne(LogEntity, {
-      type: NovelLogType.NOVEL_TASK_GET_NOVEL_LAST_PAGE,
+    let task = await this.em.findOne(TaskEntity, {
+      scope: TaskScope.NOVEL,
+      name: NovelTaskName.GET_LAST_NOVEL_PAGE,
     });
-    if (log) {
-      log.memo = { ...log.memo, last: page };
+    if (task) {
+      task.last = last;
     } else {
-      log = this.em.create(LogEntity, {
-        type: NovelLogType.NOVEL_TASK_GET_NOVEL_LAST_PAGE,
-        memo: {
-          last: page,
-          current: 1,
-        },
+      task = this.em.create(TaskEntity, {
+        scope: TaskScope.NOVEL,
+        name: NovelTaskName.GET_LAST_NOVEL_PAGE,
+        current: 1,
+        last,
       });
     }
-    await this.em.persistAndFlush(log);
-    console.log(`last novel page is: ${page}...`);
+    await this.em.persistAndFlush(task);
+    console.log(`last novel page is: ${last}...`);
     console.log('get last novel page: done.');
   }
 
   @Cron('0 */1 * * * *')
   @CreateRequestContext()
   public async getNovelsByPage() {
-    console.log('get novel by page: start...');
-    const log = await this.em.findOne(LogEntity, {
-      type: NovelLogType.NOVEL_TASK_GET_NOVEL_LAST_PAGE,
+    console.log('get novels by page: start...');
+    const getLastNovelPageTask = await this.em.findOne(TaskEntity, {
+      scope: TaskScope.NOVEL,
+      name: NovelTaskName.GET_LAST_NOVEL_PAGE,
     });
-    if (log) {
+    if (getLastNovelPageTask) {
       const pageResponse = await firstValueFrom(
         this.http.get(
-          `https://truyenfull.vn/danh-sach/truyen-moi/trang-${log.memo.current}`,
+          `https://truyenfull.vn/danh-sach/truyen-moi/trang-${getLastNovelPageTask.current}`,
         ),
       );
       const data = pageResponse.data;
@@ -98,154 +105,126 @@ export class NovelTask {
           chapterCount,
           tags,
         });
+        const getNovelChaperTask = await this.em.upsert(TaskEntity, {
+          scope: TaskScope.NOVEL,
+          name: NovelTaskName.GET_NOVEL_CHAPTER,
+          novel,
+          last: chapterCount,
+        });
+        this.em.persist(getNovelChaperTask);
         this.em.persist(novel);
       }
       console.log(`novel count: ${novelElements.length}...`);
-      if (log.memo.current >= log.memo.last) {
-        log.memo = { ...log.memo, current: 1 };
+      if (getLastNovelPageTask.current >= getLastNovelPageTask.last) {
+        getLastNovelPageTask.current = 1;
       } else {
-        log.memo = { ...log.memo, current: log.memo.current + 1 };
+        getLastNovelPageTask.current = getLastNovelPageTask.current + 1;
       }
-      this.em.persist(log);
       await this.em.flush();
     }
-    console.log('get novel by page: done.');
+    console.log('get novels by page: done.');
   }
 
   @Cron('0 */1 * * * *')
   @CreateRequestContext()
-  public async getNovelLastId() {
-    console.log('get novel last id: start...');
-    const novel = await this.em
-      .createQueryBuilder(NovelEntity)
-      .orderBy({ id: 'desc' })
-      .limit(1)
-      .getSingleResult();
-    let log = await this.em.findOne(LogEntity, {
-      type: NovelLogType.NOVEL_TASK_GET_NOVEL_LAST_ID,
-    });
+  public async getNovel() {
+    console.log('get novel: start...');
+    const novel = await this.em.findOne(
+      NovelEntity,
+      {
+        authors: null,
+        categories: null,
+        description: null,
+        score: null,
+      },
+      { populate: ['authors', 'categories'] },
+    );
     if (novel) {
-      if (log) {
-        log.memo = { ...log.memo, last: novel.id };
-      } else {
-        log = this.em.create(LogEntity, {
-          type: NovelLogType.NOVEL_TASK_GET_NOVEL_LAST_ID,
-          memo: { last: novel.id, current: 1 },
+      const response = await firstValueFrom(
+        this.http.get(`https://truyenfull.vn/${novel.slug}`),
+      );
+      const data = response.data;
+      const root = parse(data);
+      const description = root.querySelector('.desc-text').innerHTML;
+      const score = parseFloat(
+        root.querySelector('[itemprop=ratingValue]')?.text || '10',
+      );
+      const authorElement = root.querySelector('[itemprop=author]');
+      const authorSlug = authorElement.getAttribute('href').split('/').at(-2);
+      const authorName = authorElement.text;
+      const author = await this.em.upsert(AuthorEntity, {
+        slug: authorSlug,
+        name: authorName,
+      });
+      this.em.persist(author);
+      const categories = [];
+      const categoryElements = root
+        .querySelector('.info')
+        .querySelectorAll('[itemprop=genre]');
+      for (const categoryElement of categoryElements) {
+        const categorySlug = categoryElement
+          .getAttribute('href')
+          .split('/')
+          .at(-2);
+        const categoryName = categoryElement.text;
+        const category = await this.em.upsert(CategoryEntity, {
+          slug: categorySlug,
+          name: categoryName,
         });
+        this.em.persist(category);
+        categories.push(category);
       }
-      this.em.persistAndFlush(log);
-      console.log(`last novel id: ${novel.id}`);
+      novel.description = description;
+      novel.score = score;
+      if (!novel.authors.contains(author)) {
+        novel.authors.add(author);
+      }
+      for (const category of categories) {
+        if (!novel.categories.contains(category)) {
+          novel.categories.add(category);
+        }
+      }
+      await this.em.flush();
     }
-    console.log('get novel last id: done.');
+    console.log('get novel: done.');
   }
 
   @Cron('0 */1 * * * *')
   @CreateRequestContext()
-  public async getNovelChapterLastPage() {
-    console.log('get novel chapter last page: start...');
-    const getNovelLastIdLog = await this.em.findOne(LogEntity, {
-      type: NovelLogType.NOVEL_TASK_GET_NOVEL_LAST_ID,
-    });
-    if (getNovelLastIdLog) {
-      const novel = await this.em.findOne(
-        NovelEntity,
-        {
-          id: getNovelLastIdLog.memo.current,
-        },
-        { populate: ['authors', 'categories'] },
+  public async getNovelChaper() {
+    console.log('get novel chapter: start...');
+    const task = await this.em.findOne(
+      TaskEntity,
+      {
+        scope: TaskScope.NOVEL,
+        name: NovelTaskName.GET_NOVEL_CHAPTER,
+        last: { $ne: null },
+      },
+      { populate: ['novel'] },
+    );
+    if (task && (task.current === null || task.current < task.last)) {
+      if (task.current === null) {
+        task.current = 1;
+      }
+      const response = await firstValueFrom(
+        this.http.get(
+          `https://truyenfull.vn/${task.novel.slug}/chuong-${task.current}`,
+        ),
       );
-      if (novel) {
-        const response = await firstValueFrom(
-          this.http.get(`https://truyenfull.vn/${novel.slug}`),
-        );
-        const data = response.data;
-        const root = parse(data);
-        const description = root.querySelector('.desc-text').innerHTML;
-        const score = parseFloat(
-          root.querySelector('[itemprop=ratingValue]')?.text || '10',
-        );
-        const authorElement = root.querySelector('[itemprop=author]');
-        const authorSlug = authorElement.getAttribute('href').split('/').at(-2);
-        const authorName = authorElement.text;
-        const author = await this.em.upsert(AuthorEntity, {
-          slug: authorSlug,
-          name: authorName,
-        });
-        this.em.persist(author);
-        const categories = [];
-        const categoryElements = root
-          .querySelector('.info')
-          .querySelectorAll('[itemprop=genre]');
-        for (const categoryElement of categoryElements) {
-          const categorySlug = categoryElement
-            .getAttribute('href')
-            .split('/')
-            .at(-2);
-          const categoryName = categoryElement.text;
-          const category = await this.em.upsert(CategoryEntity, {
-            slug: categorySlug,
-            name: categoryName,
-          });
-          this.em.persist(category);
-          categories.push(category);
-        }
-        novel.description = description;
-        novel.score = score;
-        if (!novel.authors.contains(author)) {
-          novel.authors.add(author);
-        }
-        for (const category of categories) {
-          if (!novel.categories.contains(category)) {
-            novel.categories.add(category);
-          }
-        }
-        const pagination = root.querySelector('.pagination.pagination-sm');
-        const last = pagination
-          ? parseInt(
-              pagination
-                .querySelectorAll('li')
-                .at(-2)
-                .querySelector('a')
-                .getAttribute('href')
-                .split('/')
-                .at(-2)
-                .split('-')
-                .at(-1),
-            )
-          : 1;
-        let getNovelChapterLastPageLog = await this.em.findOne(LogEntity, {
-          type: NovelLogType.NOVEL_TASK_GET_NOVEL_CHAPTER_LAST_PAGE,
-          memo: {
-            novelId: novel.id,
-          },
-        });
-        if (getNovelChapterLastPageLog) {
-          getNovelChapterLastPageLog.memo = {
-            ...getNovelChapterLastPageLog.memo,
-            last,
-          };
-        } else {
-          getNovelChapterLastPageLog = this.em.create(LogEntity, {
-            type: NovelLogType.NOVEL_TASK_GET_NOVEL_CHAPTER_LAST_PAGE,
-            memo: {
-              novelId: novel.id,
-              last,
-              current: 1,
-            },
-          });
-        }
-        this.em.persist(getNovelChapterLastPageLog);
-      }
-      if (getNovelLastIdLog.memo.current >= getNovelLastIdLog.memo.last) {
-        getNovelLastIdLog.memo = { ...getNovelLastIdLog.memo, current: 1 };
-      } else {
-        getNovelLastIdLog.memo = {
-          ...getNovelLastIdLog.memo,
-          current: getNovelLastIdLog.memo.current + 1,
-        };
-      }
+      const data = response.data;
+      const root = parse(data);
+      const name = root.querySelector('.chapter-title').text;
+      const content = root.querySelector('.chapter-c').text;
+      const novelChapter = this.em.create(NovelChapterEntity, {
+        name,
+        content,
+        novel: task.novel,
+        sequence: task.current,
+      });
+      task.current = task.current + 1;
+      this.em.persist(novelChapter);
       await this.em.flush();
     }
-    console.log('get novel chapter last page: done.');
+    console.log('get novel chapter: done.');
   }
 }

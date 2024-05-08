@@ -10,13 +10,6 @@ export class NovelChapterEntity extends BaseEntity {
   name: string;
 
   @Property({
-    name: 'slug',
-    columnType: 'varchar(255)',
-    unique: true,
-  })
-  slug: string;
-
-  @Property({
     name: 'sequence',
     columnType: 'int',
   })
