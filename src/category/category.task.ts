@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { parse } from 'node-html-parser';
-import { EntityManager, CreateRequestContext } from '@mikro-orm/core';
 import { CategoryEntity } from 'src/entities/category.entity';
+import { EntityManager, CreateRequestContext } from '@mikro-orm/postgresql';
 
 @Injectable()
 export class CategoryTask {
@@ -25,12 +25,12 @@ export class CategoryTask {
     const elements = root
       .querySelector('.dropdown-menu.multi-column')
       .querySelectorAll('a');
-    elements.forEach(async (element) => {
+    for (const element of elements) {
       const name = element.text;
       const slug = element.getAttribute('href').split('/').at(-2);
       const category = await this.em.upsert(CategoryEntity, { name, slug });
       this.em.persist(category);
-    });
+    }
     console.log(`category count: ${elements.length}...`);
     await this.em.flush();
     console.log('get categories: done.');

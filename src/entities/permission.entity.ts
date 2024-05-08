@@ -1,4 +1,4 @@
-import { Entity, ManyToMany, Property } from '@mikro-orm/core';
+import { Collection, Entity, ManyToMany, Property } from '@mikro-orm/core';
 import { BaseEntity } from '../core/base.entity';
 import { UserEntity } from './user.entity';
 
@@ -16,5 +16,5 @@ export class PermissionEntity extends BaseEntity {
     inverseJoinColumn: 'user_id',
     nullable: true,
   })
-  users?: UserEntity[];
+  users?: Collection<UserEntity>;
 }

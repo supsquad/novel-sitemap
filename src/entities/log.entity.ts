@@ -22,8 +22,5 @@ export class LogEntity extends BaseEntity {
     columnType: 'jsonb',
     nullable: true,
   })
-  memo?: {
-    last: number;
-    current: number;
-  };
+  memo?: any;
 }

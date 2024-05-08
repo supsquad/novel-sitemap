@@ -1,4 +1,10 @@
-import { Entity, ManyToMany, OneToOne, Property } from '@mikro-orm/core';
+import {
+  Collection,
+  Entity,
+  ManyToMany,
+  OneToOne,
+  Property,
+} from '@mikro-orm/core';
 import { BaseEntity } from '../core/base.entity';
 import { UserEntity } from './user.entity';
 import { NovelEntity } from './novel.entity';
@@ -27,5 +33,5 @@ export class AuthorEntity extends BaseEntity {
     inverseJoinColumn: 'novel_id',
     nullable: true,
   })
-  novels?: NovelEntity[];
+  novels?: Collection<NovelEntity>;
 }

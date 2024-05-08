@@ -1,4 +1,10 @@
-import { Entity, ManyToMany, OneToMany, Property } from '@mikro-orm/core';
+import {
+  Collection,
+  Entity,
+  ManyToMany,
+  OneToMany,
+  Property,
+} from '@mikro-orm/core';
 import { BaseEntity } from '../core/base.entity';
 import { CategoryEntity } from './category.entity';
 import { AuthorEntity } from './author.entity';
@@ -55,7 +61,7 @@ export class NovelEntity extends BaseEntity {
   score: number;
 
   @OneToMany(() => NovelChapterEntity, 'novel')
-  chapters: NovelChapterEntity[];
+  chapters?: Collection<NovelChapterEntity>;
 
   @ManyToMany(() => CategoryEntity, undefined, {
     pivotTable: 'category_novel',
@@ -63,7 +69,7 @@ export class NovelEntity extends BaseEntity {
     inverseJoinColumn: 'category_id',
     nullable: true,
   })
-  categories?: CategoryEntity[];
+  categories?: Collection<CategoryEntity>;
 
   @ManyToMany(() => AuthorEntity, undefined, {
     pivotTable: 'author_novel',
@@ -71,5 +77,5 @@ export class NovelEntity extends BaseEntity {
     inverseJoinColumn: 'author_id',
     nullable: true,
   })
-  authors?: AuthorEntity[];
+  authors?: Collection<AuthorEntity>;
 }
