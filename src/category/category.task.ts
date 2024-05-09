@@ -13,7 +13,7 @@ export class CategoryTask {
     private readonly http: HttpService,
   ) {}
 
-  @Cron('0 */1 * * * *')
+  @Cron('0 0 0 * * *')
   @CreateRequestContext()
   public async getCategories() {
     console.log('get categories: start...');

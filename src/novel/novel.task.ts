@@ -19,7 +19,7 @@ export class NovelTask {
     private readonly http: HttpService,
   ) {}
 
-  @Cron('0 */1 * * * *')
+  @Cron('0 0 */1 * * *')
   @CreateRequestContext()
   public async getLastNovelPage() {
     console.log('get last novel page: start...');
@@ -125,7 +125,7 @@ export class NovelTask {
     console.log('get novels by page: done.');
   }
 
-  @Cron('0 */1 * * * *')
+  @Cron('30 * * * * *')
   @CreateRequestContext()
   public async getNovel() {
     console.log('get novel: start...');
