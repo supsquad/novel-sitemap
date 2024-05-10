@@ -13,26 +13,32 @@ export class CategoryTask {
     private readonly http: HttpService,
   ) {}
 
-  @Cron('0 */1 * * * *')
+  @Cron('0 */5 * * * *')
   @CreateRequestContext()
   public async getCategories() {
-    console.log('get categories: start...');
     const response = await firstValueFrom(
       this.http.get('https://truyenfull.vn'),
     );
+    if (response.status !== 200) {
+      console.log('cannot get categories page.');
+      return;
+    }
     const data = response.data;
     const root = parse(data);
     const elements = root
       .querySelector('.dropdown-menu.multi-column')
-      .querySelectorAll('a');
+      ?.querySelectorAll('a');
+    if (elements === undefined || elements.length === 0) {
+      console.log('categories not found.');
+      return;
+    }
     for (const element of elements) {
       const name = element.text;
       const slug = element.getAttribute('href').split('/').at(-2);
       const category = await this.em.upsert(CategoryEntity, { name, slug });
       this.em.persist(category);
     }
-    console.log(`category count: ${elements.length}...`);
     await this.em.flush();
-    console.log('get categories: done.');
+    console.log(`category count ${elements.length}.`);
   }
 }

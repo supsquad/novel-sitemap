@@ -8,7 +8,7 @@ export abstract class BaseEntity {
   @Property({
     name: 'created_at',
     columnType: 'timestamp',
-    default: new Date().toISOString(),
+    defaultRaw: 'now()',
   })
   createdAt: Date;
 
