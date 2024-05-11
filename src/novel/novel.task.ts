@@ -213,6 +213,7 @@ export class NovelTask {
       { populate: ['novel'] },
     );
     if (task) {
+      console.log(`get novel chapter task id: ${task.id}...`);
       if (task.current === null) {
         task.current = 1;
       }
