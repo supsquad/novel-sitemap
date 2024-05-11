@@ -10,6 +10,12 @@ export class NovelChapterEntity extends BaseEntity {
   name: string;
 
   @Property({
+    name: 'slug',
+    columnType: 'varchar(255)',
+  })
+  slug: string;
+
+  @Property({
     name: 'sequence',
     columnType: 'int',
   })
@@ -18,8 +24,9 @@ export class NovelChapterEntity extends BaseEntity {
   @Property({
     name: 'content',
     columnType: 'text',
+    nullable: true,
   })
-  content: string;
+  content?: string;
 
   @ManyToOne(() => NovelEntity)
   novel: NovelEntity;

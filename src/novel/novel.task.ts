@@ -5,11 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { parse } from 'node-html-parser';
 import { NovelTaskName } from './novel.constants';
 import { NovelEntity } from 'src/entities/novel.entity';
-import {
-  EntityManager,
-  CreateRequestContext,
-  raw,
-} from '@mikro-orm/postgresql';
+import { EntityManager, CreateRequestContext } from '@mikro-orm/postgresql';
 import { AuthorEntity } from 'src/entities/author.entity';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { TaskEntity } from 'src/entities/task.entity';
@@ -46,10 +42,14 @@ export class NovelTask {
         .split('-')
         .at(-1),
     );
-    let task = await this.em.findOne(TaskEntity, {
-      scope: TaskScope.NOVEL,
-      name: NovelTaskName.GET_LAST_NOVEL_PAGE,
-    });
+    let task = await this.em.findOne(
+      TaskEntity,
+      {
+        scope: TaskScope.NOVEL,
+        name: NovelTaskName.GET_LAST_NOVEL_PAGE,
+      },
+      { orderBy: { priority: 'asc' } },
+    );
     if (task) {
       task.last = last;
     } else {
@@ -67,14 +67,18 @@ export class NovelTask {
   @Cron('0 */5 * * * *')
   @CreateRequestContext()
   public async getNovelsByPage() {
-    const getLastNovelPageTask = await this.em.findOne(TaskEntity, {
-      scope: TaskScope.NOVEL,
-      name: NovelTaskName.GET_LAST_NOVEL_PAGE,
-    });
-    if (getLastNovelPageTask) {
+    const task = await this.em.findOne(
+      TaskEntity,
+      {
+        scope: TaskScope.NOVEL,
+        name: NovelTaskName.GET_LAST_NOVEL_PAGE,
+      },
+      { orderBy: { priority: 'asc' } },
+    );
+    if (task) {
       const pageResponse = await firstValueFrom(
         this.http.get(
-          `https://truyenfull.vn/danh-sach/truyen-moi/trang-${getLastNovelPageTask.current}`,
+          `https://truyenfull.vn/danh-sach/truyen-moi/trang-${task.current}`,
         ),
       );
       if (pageResponse.status !== 200) {
@@ -114,26 +118,20 @@ export class NovelTask {
           chapterCount,
           tags,
         });
-        const getNovelChaperTask = await this.em.upsert(TaskEntity, {
-          scope: TaskScope.NOVEL,
-          name: NovelTaskName.GET_NOVEL_CHAPTER,
-          novel,
-          last: chapterCount,
-        });
-        this.em.persist(getNovelChaperTask);
         this.em.persist(novel);
       }
-      if (getLastNovelPageTask.current >= getLastNovelPageTask.last) {
-        getLastNovelPageTask.current = 1;
+      if (task.current >= task.last) {
+        task.current = 1;
+        task.priority = task.priority + 1;
       } else {
-        getLastNovelPageTask.current = getLastNovelPageTask.current + 1;
+        task.current = task.current + 1;
       }
       await this.em.flush();
       console.log(`novel count is ${novelElements.length}.`);
     }
   }
 
-  @Cron('* */1 * * * *')
+  @Cron('0 */1 * * * *')
   @CreateRequestContext()
   public async getNovel() {
     const novel = await this.em.findOne(
@@ -142,7 +140,6 @@ export class NovelTask {
         authors: null,
         categories: null,
         description: null,
-        score: null,
       },
       { populate: ['authors', 'categories'] },
     );
@@ -161,13 +158,18 @@ export class NovelTask {
         root.querySelector('[itemprop=ratingValue]')?.text || '10',
       );
       const authorElement = root.querySelector('[itemprop=author]');
-      const authorSlug = authorElement.getAttribute('href').split('/').at(-2);
-      const authorName = authorElement.text;
-      const author = await this.em.upsert(AuthorEntity, {
-        slug: authorSlug,
-        name: authorName,
-      });
-      this.em.persist(author);
+      if (authorElement) {
+        const authorSlug = authorElement.getAttribute('href').split('/').at(-2);
+        const authorName = authorElement.text;
+        const author = await this.em.upsert(AuthorEntity, {
+          slug: authorSlug,
+          name: authorName,
+        });
+        this.em.persist(author);
+        if (!novel.authors.contains(author)) {
+          novel.authors.add(author);
+        }
+      }
       const categories = [];
       const categoryElements = root
         .querySelector('.info')
@@ -187,61 +189,115 @@ export class NovelTask {
       }
       novel.description = description;
       novel.score = score;
-      if (!novel.authors.contains(author)) {
-        novel.authors.add(author);
-      }
       for (const category of categories) {
         if (!novel.categories.contains(category)) {
           novel.categories.add(category);
         }
       }
+      const pagination = root.querySelector('.pagination.pagination-sm');
+      const last = pagination
+        ? parseInt(
+            pagination
+              .querySelectorAll('li')
+              .at(-2)
+              .querySelector('a')
+              .getAttribute('href')
+              .split('/')
+              .at(-2)
+              .split('-')
+              .at(-1),
+          )
+        : 1;
+      const task = this.em.create(TaskEntity, {
+        scope: TaskScope.NOVEL,
+        name: NovelTaskName.GET_LAST_NOVEL_CHAPTER_PAGE,
+        current: 1,
+        last,
+        novel,
+      });
+      this.em.persist(task);
       await this.em.flush();
+      console.log(`get novel id: ${novel.id}`);
     }
   }
 
   @Cron('*/15 * * * * *')
   @CreateRequestContext()
-  public async getNovelChaper() {
+  public async getNovelChapters() {
     const task = await this.em.findOne(
       TaskEntity,
       {
         scope: TaskScope.NOVEL,
-        name: NovelTaskName.GET_NOVEL_CHAPTER,
-        $or: [{ current: null }, { [raw('current')]: { $lt: raw('last') } }],
-        last: { $ne: null },
+        name: NovelTaskName.GET_LAST_NOVEL_CHAPTER_PAGE,
       },
-      { populate: ['novel'] },
+      { orderBy: { priority: 'asc' }, populate: ['novel'] },
     );
     if (task) {
-      console.log(`get novel chapter task id: ${task.id}...`);
-      if (task.current === null) {
-        task.current = 1;
-      }
       const response = await firstValueFrom(
         this.http.get(
-          `https://truyenfull.vn/${task.novel.slug}/chuong-${task.current}`,
+          `https://truyenfull.vn/${task.novel.slug}/trang-${task.current}`,
         ),
       );
       if (response.status !== 200) {
-        console.log('cannot get novel chapter.');
+        console.log('cannot get novel chapters.');
         return;
       }
       const data = response.data;
       const root = parse(data);
-      const name = root.querySelector('.chapter-title').text;
-      const content = root.querySelector('.chapter-c').text;
-      const novelChapter = this.em.create(NovelChapterEntity, {
-        name,
-        content,
-        novel: task.novel,
-        sequence: task.current,
-      });
-      this.em.persist(novelChapter);
-      task.current = task.current + 1;
-      await this.em.flush();
+      const chapterElements = root
+        .querySelectorAll('.list-chapter')
+        .flatMap((element) => element.querySelectorAll('a'));
+      for (let i = 0; i < chapterElements.length; i++) {
+        const slug = chapterElements[i].getAttribute('href').split('/').at(-2);
+        const name = chapterElements[i].text;
+        const sequence = i + (task.current - 1) * 50 + 1;
+        const novelChapter = this.em.create(NovelChapterEntity, {
+          slug,
+          name,
+          sequence,
+          novel: task.novel,
+        });
+        this.em.persist(novelChapter);
+      }
+      if (task.current >= task.last) {
+        task.current = 1;
+        task.priority = task.priority + 1;
+      } else {
+        task.current = task.current + 1;
+      }
+      this.em.flush();
       console.log(
-        `get chapter ${novelChapter.sequence}/${task.last} of novel ${task.novel.id}.`,
+        `get chapters from ${(task.current - 1) * 50 + 1} to ${chapterElements.length + (task.current - 1) * 50 + 1} of novel ${task.novel.id}`,
       );
+    }
+  }
+
+  @Cron('*/15 * * * * *')
+  @CreateRequestContext()
+  public async getNovelChaperContent() {
+    const novelChapter = await this.em.findOne(
+      NovelChapterEntity,
+      {
+        content: null,
+      },
+      { populate: ['novel'] },
+    );
+    if (novelChapter) {
+      const response = await firstValueFrom(
+        this.http.get(
+          `https://truyenfull.vn/${novelChapter.novel.slug}/${novelChapter.slug}`,
+        ),
+      );
+      if (response.status !== 200) {
+        console.log('cannot get novel chapter content.');
+        return;
+      }
+      const data = response.data;
+      const root = parse(data);
+      const content = root.querySelector('.chapter-c').text;
+      novelChapter.content = content;
+      await this.em.flush();
+      console.log(`get content of chapter ${novelChapter.id}.`);
     }
   }
 }

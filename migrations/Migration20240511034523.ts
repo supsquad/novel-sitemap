@@ -1,6 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20240510095019 extends Migration {
+export class Migration20240511034523 extends Migration {
 
   async up(): Promise<void> {
     this.addSql('create table "category" ("id" serial primary key, "created_at" timestamp not null default now(), "updated_at" timestamp null, "deleted_at" timestamp null, "slug" varchar(255) not null, "name" varchar(255) not null);');
@@ -9,14 +9,14 @@ export class Migration20240510095019 extends Migration {
     this.addSql('create table "novel" ("id" serial primary key, "created_at" timestamp not null default now(), "updated_at" timestamp null, "deleted_at" timestamp null, "slug" varchar(255) not null, "name" varchar(255) not null, "tags" varchar(255) [] null, "chapter_count" int not null default 0, "description" text null, "image" varchar(255) null, "score" float(2) not null default 10);');
     this.addSql('alter table "novel" add constraint "novel_slug_unique" unique ("slug");');
 
-    this.addSql('create table "novel_chapter" ("id" serial primary key, "created_at" timestamp not null default now(), "updated_at" timestamp null, "deleted_at" timestamp null, "name" varchar(255) not null, "sequence" int not null, "content" text not null, "novel_id" int not null);');
+    this.addSql('create table "novel_chapter" ("id" serial primary key, "created_at" timestamp not null default now(), "updated_at" timestamp null, "deleted_at" timestamp null, "name" varchar(255) not null, "slug" varchar(255) not null, "sequence" int not null, "content" text null, "novel_id" int not null);');
 
     this.addSql('create table "category_novel" ("novel_id" int not null, "category_id" int not null, constraint "category_novel_pkey" primary key ("novel_id", "category_id"));');
 
     this.addSql('create table "permission" ("id" serial primary key, "created_at" timestamp not null default now(), "updated_at" timestamp null, "deleted_at" timestamp null, "name" varchar(255) not null);');
     this.addSql('alter table "permission" add constraint "permission_name_unique" unique ("name");');
 
-    this.addSql('create table "task" ("id" serial primary key, "created_at" timestamp not null default now(), "updated_at" timestamp null, "deleted_at" timestamp null, "type" varchar(255) not null, "name" varchar(255) not null, "current" int null, "last" int null, "novel_id" int null);');
+    this.addSql('create table "task" ("id" serial primary key, "created_at" timestamp not null default now(), "updated_at" timestamp null, "deleted_at" timestamp null, "type" varchar(255) not null, "name" varchar(255) not null, "current" int null, "priority" int not null default 1, "last" int null, "novel_id" int null);');
     this.addSql('alter table "task" add constraint "task_novel_id_unique" unique ("novel_id");');
 
     this.addSql('create table "user" ("id" serial primary key, "created_at" timestamp not null default now(), "updated_at" timestamp null, "deleted_at" timestamp null, "name" varchar(255) not null, "email" varchar(255) not null, "phone" varchar(255) null, "password" varchar(255) not null, "status" varchar(255) not null default \'active\', "last_login" timestamp null, "author_id" int null);');

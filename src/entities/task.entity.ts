@@ -24,6 +24,13 @@ export class TaskEntity extends BaseEntity {
   current?: number;
 
   @Property({
+    name: 'priority',
+    columnType: 'int',
+    defaultRaw: '1',
+  })
+  priority: number;
+
+  @Property({
     name: 'last',
     columnType: 'int',
     nullable: true,

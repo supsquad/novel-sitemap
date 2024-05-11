@@ -56,7 +56,7 @@ export class NovelEntity extends BaseEntity {
   @Property({
     name: 'score',
     columnType: 'float(2)',
-    default: 10,
+    defaultRaw: '10',
   })
   score: number;
 
