@@ -1,7 +1,9 @@
 enum TaskScope {
   NOVEL = 'NOVEL',
 }
+
 enum PageConfig {
-  DEFAULT_PER_PAGE = 10
+  DEFAULT_PER_PAGE = 10,
 }
-export { TaskScope, PageConfig }
+
+export { TaskScope, PageConfig };
