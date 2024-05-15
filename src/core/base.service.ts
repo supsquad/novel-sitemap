@@ -1,47 +1,73 @@
 import {
-  BaseEntity,
-  EntityManager,
-  EntityName,
-  FilterQuery,
   FindOptions,
+  EntityManager,
+  EntityRepository,
+  ObjectQuery,
+  PopulatePath,
+  FindOneOptions,
 } from '@mikro-orm/postgresql';
-import { PaginationQueryDto } from './base.dto';
 import { Injectable } from '@nestjs/common';
+import { PaginationQueryDto } from './base.dto';
+import { BaseEntity } from './base.entity';
 
 @Injectable()
-export abstract class BaseService {
-  constructor(private readonly em: EntityManager) {}
+export abstract class BaseService<T extends BaseEntity> {
+  constructor(
+    readonly em: EntityManager,
+    readonly repo: EntityRepository<T>,
+  ) {}
 
-  public toResponse(data: any) {
+  toResponse(data: any) {
     return { message: 'Thành công', data };
   }
 
-  public async list(
-    entity: EntityName<NoInfer<BaseEntity>>,
+  async list(
     query: PaginationQueryDto,
-    where: FilterQuery<NoInfer<BaseEntity>> = {},
-    options: FindOptions<NoInfer<BaseEntity>> = {},
+    where?: ObjectQuery<T>,
+    options: FindOptions<
+      T,
+      PopulatePath.ALL,
+      PopulatePath.ALL,
+      PopulatePath.ALL
+    > = {},
   ) {
     const page = query.page;
     const size = query.size;
     const offset = page * (size - 1);
-    const [data, count] = await this.em.findAndCount(entity, where, {
-      limit: size,
-      offset: offset,
-      ...options,
-    });
+    where = { deletedAt: null, ...where };
+    options = { offset, limit: size, ...options };
+    const [data, count] = await this.repo.findAndCount(where, options);
     const last = Math.ceil(count / size);
     const previous = page === 1 ? null : page - 1;
     const next = page === last ? null : page + 1;
     return { page, size, previous, next, last, count, data };
   }
 
-  public async all(
-    entity: EntityName<NoInfer<BaseEntity>>,
-    where: FilterQuery<NoInfer<BaseEntity>> = {},
-    options: FindOptions<NoInfer<BaseEntity>> = {},
+  async all(
+    where?: ObjectQuery<T>,
+    options: FindOptions<
+      T,
+      PopulatePath.ALL,
+      PopulatePath.ALL,
+      PopulatePath.ALL
+    > = {},
   ) {
-    const data = await this.em.find(entity, where, options);
+    where = { deletedAt: null, ...where };
+    const data = await this.repo.find(where, options);
+    return data;
+  }
+
+  async get(
+    where?: ObjectQuery<T>,
+    options: FindOneOptions<
+      T,
+      PopulatePath.ALL,
+      PopulatePath.ALL,
+      PopulatePath.ALL
+    > = {},
+  ) {
+    where = { deletedAt: null, ...where };
+    const data = await this.repo.findOne(where, options);
     return data;
   }
 }

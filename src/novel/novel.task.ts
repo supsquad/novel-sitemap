@@ -15,13 +15,13 @@ import { NovelChapterEntity } from 'src/entities/novelChapter.entity';
 @Injectable()
 export class NovelTask {
   constructor(
-    private readonly em: EntityManager,
-    private readonly http: HttpService,
+    readonly em: EntityManager,
+    readonly http: HttpService,
   ) {}
 
   @Cron('0 */5 * * * *')
   @CreateRequestContext()
-  public async getLastNovelPage() {
+  async getLastNovelPage() {
     const response = await firstValueFrom(
       this.http.get('https://truyenfull.vn/danh-sach/truyen-moi/'),
     );
@@ -66,7 +66,7 @@ export class NovelTask {
 
   @Cron('0 */5 * * * *')
   @CreateRequestContext()
-  public async getNovelsByPage() {
+  async getNovelsByPage() {
     const task = await this.em.findOne(
       TaskEntity,
       {
@@ -133,7 +133,7 @@ export class NovelTask {
 
   @Cron('0 */1 * * * *')
   @CreateRequestContext()
-  public async getNovel() {
+  async getNovel() {
     const novel = await this.em.findOne(
       NovelEntity,
       {
@@ -223,7 +223,7 @@ export class NovelTask {
 
   @Cron('*/15 * * * * *')
   @CreateRequestContext()
-  public async getNovelChapters() {
+  async getNovelChapters() {
     const task = await this.em.findOne(
       TaskEntity,
       {
@@ -274,7 +274,7 @@ export class NovelTask {
 
   @Cron('*/15 * * * * *')
   @CreateRequestContext()
-  public async getNovelChaperContent() {
+  async getNovelChaperContent() {
     const novelChapter = await this.em.findOne(
       NovelChapterEntity,
       {

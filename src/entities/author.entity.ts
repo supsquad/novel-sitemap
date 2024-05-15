@@ -4,7 +4,7 @@ import {
   ManyToMany,
   OneToOne,
   Property,
-} from '@mikro-orm/core';
+} from '@mikro-orm/postgresql';
 import { BaseEntity } from '../core/base.entity';
 import { UserEntity } from './user.entity';
 import { NovelEntity } from './novel.entity';

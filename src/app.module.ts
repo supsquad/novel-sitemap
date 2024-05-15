@@ -8,6 +8,6 @@ const cronModules =
   process.env.APP_CRON === 'true' ? [ScheduleModule.forRoot()] : [];
 
 @Module({
-  imports: [DatabaseModule, CategoryModule, NovelModule, ...cronModules],
+  imports: [DatabaseModule, ...cronModules, CategoryModule, NovelModule],
 })
 export class AppModule {}

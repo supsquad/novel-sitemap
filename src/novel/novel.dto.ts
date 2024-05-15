@@ -8,16 +8,16 @@ export class NovelDto extends EntityDto {
   @ApiProperty()
   slug: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ nullable: true })
   tags: string[];
 
   @ApiProperty()
   chapterCount: number;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   description?: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ nullable: true })
   image?: string;
 
   @ApiProperty()
@@ -32,4 +32,26 @@ export class NovelPaginationDto extends PaginationDto {
 export class NovelListResponseDto extends ResponseDto {
   @ApiProperty()
   data: NovelPaginationDto;
+}
+
+export class NovelChapterDto extends EntityDto {
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  slug: string;
+
+  @ApiProperty()
+  sequence: number;
+
+  @ApiProperty({ nullable: true })
+  content: string;
+
+  @ApiProperty()
+  novel: number;
+}
+
+export class NovelChapterResponseDto extends ResponseDto {
+  @ApiProperty()
+  data: NovelChapterDto;
 }

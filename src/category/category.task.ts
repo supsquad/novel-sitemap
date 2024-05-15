@@ -9,13 +9,13 @@ import { EntityManager, CreateRequestContext } from '@mikro-orm/postgresql';
 @Injectable()
 export class CategoryTask {
   constructor(
-    private readonly em: EntityManager,
-    private readonly http: HttpService,
+    readonly em: EntityManager,
+    readonly http: HttpService,
   ) {}
 
   @Cron('0 */5 * * * *')
   @CreateRequestContext()
-  public async getCategories() {
+  async getCategories() {
     const response = await firstValueFrom(
       this.http.get('https://truyenfull.vn'),
     );

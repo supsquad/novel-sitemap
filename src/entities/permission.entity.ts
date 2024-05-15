@@ -1,4 +1,9 @@
-import { Collection, Entity, ManyToMany, Property } from '@mikro-orm/core';
+import {
+  Collection,
+  Entity,
+  ManyToMany,
+  Property,
+} from '@mikro-orm/postgresql';
 import { BaseEntity } from '../core/base.entity';
 import { UserEntity } from './user.entity';
 

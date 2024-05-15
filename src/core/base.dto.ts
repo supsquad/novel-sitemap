@@ -32,10 +32,10 @@ export class PaginationDto {
   @ApiProperty()
   last: number;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ nullable: true })
   previous: number;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ nullable: true })
   next: number;
 
   @ApiProperty()
@@ -49,6 +49,9 @@ export class EntityDto {
   @ApiProperty()
   createdAt: Date;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ nullable: true })
   updatedAt: Date;
+
+  @ApiProperty({ nullable: true })
+  deletedAt: Date;
 }
