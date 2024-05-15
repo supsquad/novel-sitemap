@@ -1,15 +1,20 @@
-import { Controller, Get, HttpStatus, Query, Res } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Get, Query } from '@nestjs/common';
 import { NovelService } from './novel.service';
+import { PaginationQueryDto } from 'src/core/base.dto';
+import { NovelEntity } from 'src/entities/novel.entity';
+import { NovelListResponseDto } from './novel.dto';
+import { ApiOkResponse } from '@nestjs/swagger';
 
 @Controller('novel')
 export class NovelController {
   constructor(private novelService: NovelService) {}
 
+  @ApiOkResponse({
+    type: NovelListResponseDto,
+  })
   @Get('')
-  async list(@Res() res: Response, @Query('page') page?: number) {
-    const currentPage = page ? page : 1;
-    const novels = await this.novelService.list(currentPage);
-    res.status(HttpStatus.OK).send(novels);
+  async list(@Query() query: PaginationQueryDto) {
+    const data = await this.novelService.list(NovelEntity, query);
+    return this.novelService.toResponse(data);
   }
 }

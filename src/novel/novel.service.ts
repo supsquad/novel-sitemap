@@ -1,19 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/postgresql';
-import { NovelEntity } from 'src/entities/novel.entity';
-import { PageConfig } from 'src/app.constants';
-@Injectable()
-export class NovelService {
-  constructor(private readonly em: EntityManager) {}
+import { BaseService } from 'src/core/base.service';
 
-  public async list(currentPage: number, perPage?: number) {
-    const limit = perPage ? perPage : PageConfig.DEFAULT_PER_PAGE;
-    const offset = currentPage * (limit - 1);
-    const [novels] = await this.em.findAndCount(
-      NovelEntity,
-      {},
-      { limit: limit, offset: offset },
-    );
-    return novels;
-  }
-}
+@Injectable()
+export class NovelService extends BaseService {}
