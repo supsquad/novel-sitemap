@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional } from 'class-validator';
 import { Pagination } from './base.constants';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
@@ -15,11 +15,6 @@ export class PaginationQueryDto {
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   size: number = Pagination.PAGE_SIZE;
-
-  @ApiProperty({ required: false })
-  @IsString()
-  @IsOptional()
-  orderBy: string = '-createdAt';
 }
 
 export class ResponseDto {
