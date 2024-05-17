@@ -33,13 +33,13 @@ export abstract class BaseService<T extends BaseEntity> {
   ) {
     const page = query.page;
     const size = query.size;
-    const offset = page * (size - 1);
+    const offset = (page - 1) * size;
     where = { deletedAt: null, ...where };
     options = { offset, limit: size, ...options };
     const [data, count] = await this.repo.findAndCount(where, options);
     const last = Math.ceil(count / size);
     const previous = page === 1 ? null : page - 1;
-    const next = page === last ? null : page + 1;
+    const next = page >= last ? null : page + 1;
     return { page, size, previous, next, last, count, data };
   }
 

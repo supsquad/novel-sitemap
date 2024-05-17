@@ -189,9 +189,12 @@ export class NovelTask {
       }
       novel.description = description;
       novel.score = score;
+      if (novel.categories === null) {
+        novel.categories = [];
+      }
       for (const category of categories) {
-        if (!novel.categories.contains(category)) {
-          novel.categories.add(category);
+        if (!novel.categories.includes(category.slug)) {
+          novel.categories.push(category.slug);
         }
       }
       const pagination = root.querySelector('.pagination.pagination-sm');
@@ -251,7 +254,7 @@ export class NovelTask {
         const slug = chapterElements[i].getAttribute('href').split('/').at(-2);
         const name = chapterElements[i].text;
         const sequence = i + (task.current - 1) * 50 + 1;
-        const novelChapter = this.em.create(NovelChapterEntity, {
+        const novelChapter = await this.em.upsert(NovelChapterEntity, {
           slug,
           name,
           sequence,

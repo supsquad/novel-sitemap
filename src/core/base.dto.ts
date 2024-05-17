@@ -55,3 +55,5 @@ export class EntityDto {
   @ApiProperty({ nullable: true })
   deletedAt: Date;
 }
+
+export class ParamDto {}

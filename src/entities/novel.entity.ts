@@ -6,7 +6,6 @@ import {
   Property,
 } from '@mikro-orm/postgresql';
 import { BaseEntity } from '../core/base.entity';
-import { CategoryEntity } from './category.entity';
 import { AuthorEntity } from './author.entity';
 import { NovelChapterEntity } from './novelChapter.entity';
 
@@ -60,22 +59,16 @@ export class NovelEntity extends BaseEntity {
   })
   score: number;
 
+  @Property({
+    name: 'categories',
+    columnType: 'varchar(255) []',
+    nullable: true,
+  })
+  categories?: string[];
+
   @OneToMany(() => NovelChapterEntity, 'novel')
   chapters?: Collection<NovelChapterEntity>;
 
-  @ManyToMany(() => CategoryEntity, undefined, {
-    pivotTable: 'category_novel',
-    joinColumn: 'novel_id',
-    inverseJoinColumn: 'category_id',
-    nullable: true,
-  })
-  categories?: Collection<CategoryEntity>;
-
-  @ManyToMany(() => AuthorEntity, undefined, {
-    pivotTable: 'author_novel',
-    joinColumn: 'novel_id',
-    inverseJoinColumn: 'author_id',
-    nullable: true,
-  })
+  @ManyToMany(() => AuthorEntity, (author) => author.novels)
   authors?: Collection<AuthorEntity>;
 }

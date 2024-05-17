@@ -16,16 +16,20 @@ export class NovelChapterService extends BaseService<NovelChapterEntity> {
     super(em, repo);
   }
 
-  async getChapterById(id: number) {
-    const data = await this.get({ id, content: { $ne: null } });
+  async getChapterBySlug(novelSlug: string, chapterSlug: string) {
+    const data = await this.get({
+      novel: { slug: novelSlug },
+      slug: chapterSlug,
+      content: { $ne: null },
+    });
     return data;
   }
 
-  async listNovelChaptersById(id: number, query: PaginationQueryDto) {
+  async listNovelChaptersBySlug(slug: string, query: PaginationQueryDto) {
     const data = await this.list(
       query,
-      { novel: id },
-      { exclude: ['content'] },
+      { novel: { slug }, content: { $ne: null } },
+      { exclude: ['content'], orderBy: { sequence: 'asc' } },
     );
     return data;
   }

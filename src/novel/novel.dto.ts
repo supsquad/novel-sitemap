@@ -1,5 +1,45 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { EntityDto, PaginationDto, ResponseDto } from 'src/core/base.dto';
+import { Transform } from 'class-transformer';
+import { IsArray, IsOptional, IsString, Matches } from 'class-validator';
+import { AuthorDto } from 'src/author/author.dto';
+import {
+  EntityDto,
+  PaginationDto,
+  PaginationQueryDto,
+  ParamDto,
+  ResponseDto,
+} from 'src/core/base.dto';
+
+export class ListNovelsPaginationQueryDto extends PaginationQueryDto {
+  @ApiProperty({ required: false })
+  @IsArray()
+  @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : Array(value)))
+  tags?: string[];
+
+  @ApiProperty({ required: false })
+  @IsArray()
+  @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : Array(value)))
+  categories?: string[];
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  author?: string;
+}
+
+export class GetNovelParamDto extends ParamDto {
+  @ApiProperty()
+  @Matches('[a-z0-9-]+')
+  slug: string;
+}
+
+export class ListNovelChaptersParamDto extends ParamDto {
+  @ApiProperty()
+  @Matches('[a-z0-9-]+')
+  slug: string;
+}
 
 export class NovelDto extends EntityDto {
   @ApiProperty()
@@ -22,6 +62,12 @@ export class NovelDto extends EntityDto {
 
   @ApiProperty()
   score: number;
+
+  @ApiProperty()
+  categories: string[];
+
+  @ApiProperty({ required: false, nullable: true })
+  authors: AuthorDto[];
 }
 
 export class NovelPaginationDto extends PaginationDto {
@@ -29,9 +75,14 @@ export class NovelPaginationDto extends PaginationDto {
   data: NovelDto[];
 }
 
-export class NovelListResponseDto extends ResponseDto {
+export class ListNovelsResponseDto extends ResponseDto {
   @ApiProperty()
   data: NovelPaginationDto;
+}
+
+export class NovelResponseDto extends ResponseDto {
+  @ApiProperty()
+  data: NovelDto;
 }
 
 export class NovelChapterDto extends EntityDto {
@@ -54,4 +105,14 @@ export class NovelChapterDto extends EntityDto {
 export class NovelChapterResponseDto extends ResponseDto {
   @ApiProperty()
   data: NovelChapterDto;
+}
+
+export class GetChapterParamDto extends ParamDto {
+  @ApiProperty()
+  @Matches('[a-z0-9-]+')
+  novelSlug: string;
+
+  @ApiProperty()
+  @Matches('[a-z0-9-]+')
+  chapterSlug: string;
 }

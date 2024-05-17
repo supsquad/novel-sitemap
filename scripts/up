@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -a
-. .env.$1.local
+. .env.$1
 set +a
 
 if [ "$2" = "--app" ]; then

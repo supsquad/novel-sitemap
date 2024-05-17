@@ -7,7 +7,7 @@ services:
     ports:
       - '${DATABASE_PORT}:5432'
     env_file:
-      - .env.${MODE}.local
+      - .env.${MODE}
       - .env.compose
   api:
     image: ${APP_IMAGE}
@@ -16,7 +16,7 @@ services:
     ports:
       - ${APP_PORT}:3000
     env_file:
-      - .env.${MODE}.local
+      - .env.${MODE}
       - .env.compose
     profiles:
       - app
@@ -30,7 +30,7 @@ services:
     restart: always
     entrypoint: ['yarn', 'start:prod']
     env_file:
-      - .env.${MODE}.local
+      - .env.${MODE}
       - .env.compose
     environment:
       - APP_CRON=true
