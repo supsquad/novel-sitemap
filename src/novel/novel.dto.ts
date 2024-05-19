@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsArray, IsOptional, IsString, Matches } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
 import { AuthorDto } from 'src/author/author.dto';
 import {
   EntityDto,
@@ -27,6 +33,12 @@ export class ListNovelsPaginationQueryDto extends PaginationQueryDto {
   @IsString()
   @IsOptional()
   author?: string;
+
+  @ApiProperty({ required: false })
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ value }) => Boolean(value))
+  recent?: boolean;
 }
 
 export class GetNovelParamDto extends ParamDto {

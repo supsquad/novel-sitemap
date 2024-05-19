@@ -22,6 +22,7 @@ export class NovelService extends BaseService<NovelEntity> {
 
   async listNovels(query: ListNovelsPaginationQueryDto) {
     let where: ObjectQuery<NovelEntity> = { description: { $ne: null } };
+    let orderBy: any = { createdAt: 'asc' };
     if (query.tags) {
       where = { ...where, tags: { $contains: query.tags } };
     }
@@ -31,9 +32,12 @@ export class NovelService extends BaseService<NovelEntity> {
     if (query.author) {
       where = { ...where, authors: { slug: query.author } };
     }
+    if (query.recent) {
+      orderBy = { ...orderBy, chapters: { createdAt: 'desc' } };
+    }
     const data = await this.list(query, where, {
       exclude: ['description'] as never,
-      orderBy: { createdAt: 'asc' },
+      orderBy,
     });
     return data;
   }

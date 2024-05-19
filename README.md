@@ -8,7 +8,7 @@
 
 ## Setup
 
-Initial development enviroment (run only one)
+Initial development environment (run only one)
 
 ```
 ./scripts/up development
@@ -22,11 +22,11 @@ Initial development enviroment (run only one)
 
 ## Docs
 
-API documentation URI: `http://localhost:3030/docs` (May change base on enviroment).
+API documentation URI: `http://localhost:3030/docs` (May change base on environment).
 
 ## Migration
 
-Run after initial development enviroment
+Run after initial development environment
 
 ```
 ./scripts/upgrade development
