@@ -1,6 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20240517092128 extends Migration {
+export class Migration20240520175603 extends Migration {
 
   async up(): Promise<void> {
     this.addSql('create table "category" ("id" serial primary key, "created_at" timestamp not null default now(), "updated_at" timestamp null, "deleted_at" timestamp null, "slug" varchar(255) not null, "name" varchar(255) not null);');
@@ -29,7 +29,7 @@ export class Migration20240517092128 extends Migration {
     this.addSql('alter table "author" add constraint "author_slug_unique" unique ("slug");');
     this.addSql('alter table "author" add constraint "author_user_id_unique" unique ("user_id");');
 
-    this.addSql('create table "author_novel" ("novel_id" int not null, "author_id" int not null, constraint "author_novel_pkey" primary key ("novel_id", "author_id"));');
+    this.addSql('create table "author_novel" ("author_id" int not null, "novel_id" int not null, constraint "author_novel_pkey" primary key ("author_id", "novel_id"));');
 
     this.addSql('alter table "novel_chapter" add constraint "novel_chapter_novel_id_foreign" foreign key ("novel_id") references "novel" ("id") on update cascade;');
 
@@ -42,8 +42,8 @@ export class Migration20240517092128 extends Migration {
 
     this.addSql('alter table "author" add constraint "author_user_id_foreign" foreign key ("user_id") references "user" ("id") on update cascade on delete set null;');
 
-    this.addSql('alter table "author_novel" add constraint "author_novel_novel_id_foreign" foreign key ("novel_id") references "novel" ("id") on update cascade on delete cascade;');
     this.addSql('alter table "author_novel" add constraint "author_novel_author_id_foreign" foreign key ("author_id") references "author" ("id") on update cascade on delete cascade;');
+    this.addSql('alter table "author_novel" add constraint "author_novel_novel_id_foreign" foreign key ("novel_id") references "novel" ("id") on update cascade on delete cascade;');
   }
 
 }

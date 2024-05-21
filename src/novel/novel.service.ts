@@ -38,6 +38,7 @@ export class NovelService extends BaseService<NovelEntity> {
     const data = await this.list(query, where, {
       exclude: ['description'] as never,
       orderBy,
+      populate: ['authors'] as never,
     });
     return data;
   }

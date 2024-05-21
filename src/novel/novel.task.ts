@@ -141,7 +141,7 @@ export class NovelTask {
         categories: null,
         description: null,
       },
-      { populate: ['authors', 'categories'] },
+      { populate: ['authors'] },
     );
     if (novel) {
       const response = await firstValueFrom(
