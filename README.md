@@ -11,13 +11,13 @@
 Initial development environment (run only one)
 
 ```
-./scripts/up development
+./scripts/up dev
 ```
 
 ## Run
 
 ```
-./scripts/serve development
+./scripts/serve dev
 ```
 
 ## Docs
@@ -29,7 +29,7 @@ API documentation URI: `http://localhost:3030/docs` (May change base on environm
 Run after initial development environment
 
 ```
-./scripts/upgrade development
+./scripts/upgrade dev
 ```
 
 ## Scripts
