@@ -34,7 +34,7 @@ export class NovelEntity extends BaseEntity {
   @Property({
     name: 'chapter_count',
     columnType: 'int',
-    default: 0,
+    defaultRaw: '0',
   })
   chapterCount: number;
 

@@ -96,14 +96,6 @@ export class NovelTask {
           .querySelector('a');
         const name = nameElement.text;
         const slug = nameElement.getAttribute('href').split('/').at(-2);
-        const chapterCount =
-          parseInt(
-            novelElement
-              .querySelector('.col-xs-2.text-info')
-              .querySelector('a')
-              .text.split(' ')
-              .at(-1),
-          ) || 0;
         const tags = [];
         const tagElements = novelElement.querySelectorAll('.label-title');
         for (const tagElement of tagElements) {
@@ -112,12 +104,7 @@ export class NovelTask {
             tags.push(tagElementClasses.at(1).split('-').at(-1));
           }
         }
-        const novel = await this.em.upsert(NovelEntity, {
-          name,
-          slug,
-          chapterCount,
-          tags,
-        });
+        const novel = await this.em.upsert(NovelEntity, { name, slug, tags });
         this.em.persist(novel);
       }
       if (task.current >= task.last) {
@@ -236,6 +223,7 @@ export class NovelTask {
       { orderBy: { priority: 'asc' }, populate: ['novel'] },
     );
     if (task) {
+      const novel = await this.em.findOne(NovelEntity, { id: task.novel.id });
       const response = await firstValueFrom(
         this.http.get(
           `https://truyenfull.vn/${task.novel.slug}/trang-${task.current}`,
@@ -262,6 +250,7 @@ export class NovelTask {
         });
         this.em.persist(novelChapter);
       }
+      novel.chapterCount = novel.chapterCount + chapterElements.length;
       if (task.current >= task.last) {
         task.current = 1;
         task.priority = task.priority + 1;
