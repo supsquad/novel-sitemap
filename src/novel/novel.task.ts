@@ -251,6 +251,9 @@ export class NovelTask {
         this.em.persist(novelChapter);
       }
       novel.chapterCount = novel.chapterCount + chapterElements.length;
+      console.log(
+        `get chapters from ${(task.current - 1) * 50 + 1} to ${chapterElements.length + (task.current - 1) * 50 + 1} of novel ${task.novel.id}`,
+      );
       if (task.current >= task.last) {
         task.current = 1;
         task.priority = task.priority + 1;
@@ -258,9 +261,6 @@ export class NovelTask {
         task.current = task.current + 1;
       }
       this.em.flush();
-      console.log(
-        `get chapters from ${(task.current - 1) * 50 + 1} to ${chapterElements.length + (task.current - 1) * 50 + 1} of novel ${task.novel.id}`,
-      );
     }
   }
 
