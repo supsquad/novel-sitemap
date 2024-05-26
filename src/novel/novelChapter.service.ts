@@ -33,4 +33,13 @@ export class NovelChapterService extends BaseService<NovelChapterEntity> {
     );
     return data;
   }
+
+  async getChapterBySequence(slug: string, sequence: number) {
+    const data = await this.get({
+      novel: { slug: slug },
+      sequence,
+      content: { $ne: null },
+    });
+    return data;
+  }
 }

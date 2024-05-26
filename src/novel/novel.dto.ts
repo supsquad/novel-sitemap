@@ -119,7 +119,7 @@ export class NovelChapterResponseDto extends ResponseDto {
   data: NovelChapterDto;
 }
 
-export class GetChapterParamDto extends ParamDto {
+export class GetChapterBySlugParamDto extends ParamDto {
   @ApiProperty()
   @Matches('[a-z0-9-]+')
   novelSlug: string;
@@ -127,4 +127,14 @@ export class GetChapterParamDto extends ParamDto {
   @ApiProperty()
   @Matches('[a-z0-9-]+')
   chapterSlug: string;
+}
+
+export class GetChapterBySequenceParamDto extends ParamDto {
+  @ApiProperty()
+  @Matches('[a-z0-9-]+')
+  slug: string;
+
+  @ApiProperty()
+  @Matches('[0-9]+')
+  sequence: number;
 }

@@ -8,7 +8,8 @@ import {
   ListNovelsPaginationQueryDto,
   NovelResponseDto,
   ListNovelChaptersParamDto,
-  GetChapterParamDto,
+  GetChapterBySlugParamDto,
+  GetChapterBySequenceParamDto,
 } from './novel.dto';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { NovelChapterService } from './novelChapter.service';
@@ -54,10 +55,22 @@ export class NovelController {
     type: NovelChapterResponseDto,
   })
   @Get(':novelSlug/chapter/:chapterSlug')
-  async getChapterBySlug(@Param() param: GetChapterParamDto) {
+  async getChapterBySlug(@Param() param: GetChapterBySlugParamDto) {
     const data = await this.novelChapterService.getChapterBySlug(
       param.novelSlug,
       param.chapterSlug,
+    );
+    return this.novelChapterService.toResponse(data);
+  }
+
+  @ApiOkResponse({
+    type: NovelChapterResponseDto,
+  })
+  @Get(':slug/sequence/:sequence')
+  async getChapterBySequence(@Param() param: GetChapterBySequenceParamDto) {
+    const data = await this.novelChapterService.getChapterBySequence(
+      param.slug,
+      param.sequence,
     );
     return this.novelChapterService.toResponse(data);
   }
