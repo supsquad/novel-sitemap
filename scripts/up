@@ -4,8 +4,11 @@ set -a
 . .env.$1
 set +a
 
-if [ "$2" = "--app" ]; then
+if [ "$2" = "--build" ]; then
     source ./scripts/build $1
+fi
+
+if [ "$2" = "--app" ]; then
     export COMPOSE_PROFILES=app
 fi
 
