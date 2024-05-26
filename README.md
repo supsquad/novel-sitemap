@@ -35,9 +35,9 @@ Run after initial development environment
 ## Scripts
 
 - build: Build docker image
-- create: Create new migrate when change entities
+- migrate-generate: Create new migrate when change entities
 - down: Down docker compose
-- downgrade: Down migration
+- migrate-down: Down migration
 - serve: Run backend
 - up: Up docker compose
-- upgrade: Up migration
+- migrate-up: Up migration
