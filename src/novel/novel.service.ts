@@ -32,6 +32,15 @@ export class NovelService extends BaseService<NovelEntity> {
     if (query.author) {
       where = { ...where, authors: { slug: query.author } };
     }
+    if (query.keyword) {
+      where = {
+        ...where,
+        $or: [
+          { name: { $like: `%${query.keyword}%` } },
+          { authors: { name: { $like: `%${query.keyword}%` } } },
+        ],
+      };
+    }
     if (query.recent) {
       orderBy = { ...orderBy, chapters: { createdAt: 'desc' } };
     }

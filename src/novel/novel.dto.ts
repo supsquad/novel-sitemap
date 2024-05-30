@@ -39,6 +39,11 @@ export class ListNovelsPaginationQueryDto extends PaginationQueryDto {
   @IsOptional()
   @Transform(({ value }) => Boolean(value))
   recent?: boolean;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  keyword?: string;
 }
 
 export class GetNovelParamDto extends ParamDto {
