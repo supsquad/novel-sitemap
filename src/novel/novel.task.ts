@@ -67,14 +67,10 @@ export class NovelTask {
   @Cron('0 */5 * * * *')
   @CreateRequestContext()
   async getNovelsByPage() {
-    const task = await this.em.findOne(
-      TaskEntity,
-      {
-        scope: TaskScope.NOVEL,
-        name: NovelTaskName.GET_LAST_NOVEL_PAGE,
-      },
-      { orderBy: { priority: 'asc' } },
-    );
+    const task = await this.em.findOne(TaskEntity, {
+      scope: TaskScope.NOVEL,
+      name: NovelTaskName.GET_LAST_NOVEL_PAGE,
+    });
     if (task) {
       const pageResponse = await firstValueFrom(
         this.http.get(
@@ -109,7 +105,6 @@ export class NovelTask {
       }
       if (task.current >= task.last) {
         task.current = 1;
-        task.priority = task.priority + 1;
       } else {
         task.current = task.current + 1;
       }
@@ -272,7 +267,7 @@ export class NovelTask {
       {
         content: null,
       },
-      { populate: ['novel'] },
+      { populate: ['novel'], orderBy: { id: 'asc' } },
     );
     if (novelChapter) {
       const response = await firstValueFrom(
