@@ -4,6 +4,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { DatabaseModule } from './core/database.module';
 import { NovelModule } from './novel/novel.module';
 import { AuthorModule } from './author/author.module';
+import { FeedbackModule } from './feedback/feedback.module';
 
 const cronModules =
   process.env.APP_CRON === 'true' ? [ScheduleModule.forRoot()] : [];
@@ -15,6 +16,7 @@ const cronModules =
     CategoryModule,
     NovelModule,
     AuthorModule,
+    FeedbackModule,
   ],
 })
 export class AppModule {}

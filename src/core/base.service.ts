@@ -21,6 +21,12 @@ export abstract class BaseService<T extends BaseEntity> {
     return { message: 'Thành công', data };
   }
 
+  async create(payload: any) {
+    const data = this.repo.create(payload);
+    await this.em.persistAndFlush(data);
+    return data;
+  }
+
   async list(
     query: PaginationQueryDto,
     where?: ObjectQuery<T>,
