@@ -12,7 +12,7 @@ async function bootstrap() {
    */
   const config = new DocumentBuilder()
     .setTitle('Novel Sitemap')
-    .setDescription('Novel Sitemap description')
+    .setDescription('Novel Sitemap Description')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
