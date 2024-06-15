@@ -11,8 +11,8 @@ async function bootstrap() {
    * Swagger settings
    */
   const config = new DocumentBuilder()
-    .setTitle('Novel API')
-    .setDescription('Novel API description')
+    .setTitle('Novel Sitemap')
+    .setDescription('Novel Sitemap description')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);

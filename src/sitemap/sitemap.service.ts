@@ -1,6 +1,4 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
 import { CategoryEntity } from '../entities/category.entity';
 import { NovelEntity } from '../entities/novel.entity';
 import { SitemapStream, streamToPromise } from 'sitemap';
@@ -11,18 +9,12 @@ import { EntityManager } from '@mikro-orm/core';
 
 @Injectable()
 export class SitemapService implements OnModuleInit {
-  constructor(
-    @InjectRepository(CategoryEntity)
-    private readonly categoryRepository: EntityRepository<CategoryEntity>,
-    @InjectRepository(NovelEntity)
-    private readonly novelRepository: EntityRepository<NovelEntity>,
-    @InjectRepository(NovelChapterEntity)
-    private readonly novelChapterRepository: EntityRepository<NovelChapterEntity>,
-    private readonly em: EntityManager,
-  ) {}
+  constructor(private readonly em: EntityManager) {}
+
   async onModuleInit() {
     await this.generateSitemap();
   }
+
   async generateSitemap(): Promise<void> {
     const publicDir = join(process.cwd(), 'public');
     if (!existsSync(publicDir)) {
@@ -32,6 +24,7 @@ export class SitemapService implements OnModuleInit {
     await this.generateNovelSitemap(publicDir);
     await this.generateChapterSitemap(publicDir);
   }
+
   async generateCategorySitemap(publicDir: string): Promise<void> {
     const categories = await this.em
       .fork()
@@ -40,7 +33,6 @@ export class SitemapService implements OnModuleInit {
     const sitemap = new SitemapStream({ hostname: 'https://truyencuon.vn' });
     const sitemapPath = join(publicDir, 'category.xml');
     const writeStream = createWriteStream(sitemapPath);
-
     categories.forEach((category) => {
       sitemap.write({
         url: `/category/${category.slug}`,
@@ -49,7 +41,6 @@ export class SitemapService implements OnModuleInit {
         priority: 0.8,
       });
     });
-
     sitemap.end();
     await streamToPromise(sitemap).then((data) => writeStream.write(data));
     writeStream.end();
@@ -60,7 +51,6 @@ export class SitemapService implements OnModuleInit {
     const sitemap = new SitemapStream({ hostname: 'https://truyencuon.vn' });
     const sitemapPath = join(publicDir, 'novel.xml');
     const writeStream = createWriteStream(sitemapPath);
-
     novels.forEach((novel) => {
       sitemap.write({
         url: `/novel/${novel.slug}`,
@@ -69,11 +59,11 @@ export class SitemapService implements OnModuleInit {
         priority: 0.8,
       });
     });
-
     sitemap.end();
     await streamToPromise(sitemap).then((data) => writeStream.write(data));
     writeStream.end();
   }
+
   async generateChapterSitemap(publicDir: string): Promise<void> {
     const novels = await this.em
       .fork()
@@ -82,7 +72,6 @@ export class SitemapService implements OnModuleInit {
     const sitemap = new SitemapStream({ hostname: 'https://truyencuon.vn' });
     const sitemapPath = join(publicDir, 'chapter.xml');
     const writeStream = createWriteStream(sitemapPath);
-
     for (const novel of novels) {
       const chapters = await this.em
         .fork()
