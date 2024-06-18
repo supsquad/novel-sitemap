@@ -1,6 +1,7 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import config from '../core/axios.config';
+import { SitemapController } from './sitemap.controller';
 import { SitemapService } from './sitemap.service';
 import { CategoryEntity } from '../entities/category.entity';
 import { NovelEntity } from '../entities/novel.entity';
@@ -16,6 +17,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
       NovelChapterEntity,
     ]),
   ],
+  controllers: [SitemapController],
   providers: [SitemapService],
 })
 export class SitemapModule {}

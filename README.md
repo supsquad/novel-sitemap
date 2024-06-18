@@ -22,7 +22,7 @@ Initial development environment (run only one)
 
 ## Docs
 
-API documentation URI: `http://localhost:3030/docs` (May change base on environment).
+API documentation URI: `http://localhost:3031/docs` (May change base on environment).
 
 ## Migration
 
